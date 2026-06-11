@@ -100,7 +100,7 @@ Router(config-if)# no shutdown
 ping 192.168.2.10
 \`\`\`
 
-> 💡 การ ping ครั้งแรกอาจขึ้น \`Request timed out\` เพราะกระบวนการ ARP หลังจากนั้นจะขึ้น \`Reply from...\` แสดงว่าเชื่อมต่อสำเร็จ
+ การ ping ครั้งแรกอาจขึ้น \`Request timed out\` เพราะกระบวนการ ARP หลังจากนั้นจะขึ้น \`Reply from...\` แสดงว่าเชื่อมต่อสำเร็จ
 
 </details>
 
@@ -111,6 +111,11 @@ ping 192.168.2.10
 > Enterprise-grade, 4-floor company network designed and verified in Cisco Packet Tracer — Layer 2/3 switching, VLAN segmentation with policy-based access control, ASA firewall, centralized servers, and wireless.
 >
 > เครือข่ายองค์กรอาคาร 4 ชั้น ออกแบบและทดสอบบน Cisco Packet Tracer ครอบคลุม Switching, VLAN, การคุมสิทธิ์ข้ามแผนกด้วย ACL, ASA Firewall, Server Farm และ Wireless
+
+**Topologo diagram**
+
+
+<img width="3555" height="2512" alt="present" src="https://github.com/user-attachments/assets/9acc6839-4f59-48ad-9004-ad6fcf957fe0" />
 
 ### 🎯 Concept / แนวคิดของระบบ
 
@@ -144,7 +149,7 @@ ping 192.168.2.10
 
 > 💡 ใช้ **VLSM** — แผนกใหญ่ (Sales/Marketing/HR) ได้ /26, แผนกเล็ก (IT/Meeting/CEO) ได้ /27 เพื่อใช้ IP อย่างคุ้มค่า
 
-### 🔐 Access Control Policy / นโยบายการเข้าถึง (ACL)
+### Access Control Policy / นโยบายการเข้าถึง (ACL)
 
 หัวใจของดีไซน์ — ใช้ ACL บังคับว่าแต่ละแผนกคุยกับใครได้:
 
@@ -160,7 +165,7 @@ ping 192.168.2.10
 
 > รูปแบบ ACL: อนุญาตให้เข้า Server (VLAN 99) ก่อน → ปฏิเสธการเข้า internal subnet อื่น (192.168.0.0/16) → แล้วค่อย permit ออก internet (`permit any`) ซึ่งเป็นการทำ **least-privilege segmentation**
 
-### 🛡️ Edge Security — ASA Firewall
+### Edge Security — ASA Firewall
 
 | Feature | Implementation |
 |---|---|
@@ -192,14 +197,14 @@ ping 192.168.2.10
 | **Services** | DHCP relay (`ip helper-address`), DNS, Web, FTP |
 | **Wireless** | WLC + LWAP + CAPWAP, RADIUS AAA |
 
-### 💡 Key Technical Lessons / บทเรียนสำคัญ
+### Key Technical Lessons / บทเรียนสำคัญ
 
 - L3 switch ต้องเปิด `ip routing` ถึงจะทำ Inter-VLAN routing ได้
 - ใช้ `ip helper-address` ชี้ไป DHCP server เพื่อให้ทุก VLAN ขอ IP จาก server กลางตัวเดียว
 - ASA Static NAT จับคู่ private server กับ public IP เพื่อเปิดบริการสู่ภายนอกอย่างปลอดภัย
 - ACL วางลำดับ permit/deny สำคัญมาก — permit สิ่งที่อนุญาตก่อน แล้วค่อย deny ที่เหลือ
 
-### 📂 Project Structure / โครงสร้าง
+### Project Structure / โครงสร้าง
 
 ```
 TechStar/
@@ -213,15 +218,127 @@ TechStar/
 └── docs/
     └── design-document.md        # VLAN/subnet/ACL design rationale
 ```
-**Topologo diagram**
 
 
-<img width="3555" height="2512" alt="present" src="https://github.com/user-attachments/assets/9acc6839-4f59-48ad-9004-ad6fcf957fe0" />
+# 3. Network Automation / ระบบอัตโนมัติ
+ 
+> Automating network device configuration at scale using Python (Netmiko) and Ansible, tested against Cisco IOS routers in GNS3 / EVE-NG.
+>
+> การทำ automation สำหรับตั้งค่าอุปกรณ์เครือข่ายจำนวนมากด้วย Python (Netmiko) และ Ansible ทดสอบบน Cisco IOS ใน GNS3 / EVE-NG
+ 
+### 🎯 Concept / แนวคิด
+ 
+แทนที่จะ config ทีละอุปกรณ์ด้วยมือ ใช้สคริปต์ push config ไปหลายตัวพร้อมกัน, backup running-config อัตโนมัติ และทำให้การตั้งค่าเป็นมาตรฐานเดียวกัน (Infrastructure as Code)
+ 
+### Lab Series / ชุดแล็บ
+ 
+| Lab | Topic / หัวข้อ | Tool |
+|---|---|---|
+| **Lab 1** | เชื่อมต่อ + ดึงข้อมูลจากอุปกรณ์ตัวเดียว | Netmiko |
+| **Lab 2** | เชื่อมต่อหลายอุปกรณ์พร้อมกัน (loop) | Netmiko |
+| **Lab 3** | Push configuration ไปหลายตัว | Netmiko |
+| **Lab 4** | Backup running-config อัตโนมัติ | Netmiko |
+| **Lab 5** | ทำงานเดียวกันด้วย playbook | Ansible |
+ 
+### 🛠️ Tech Stack
+ 
+- **Python 3 + Netmiko** — SSH automation library สำหรับ Cisco IOS
+- **Ansible** — declarative automation ด้วย playbook (YAML)
+- **GNS3 / EVE-NG** — virtual lab environment รัน Cisco vIOS images
+- **Ubuntu (PFNE node)** — เครื่องที่ใช้รันสคริปต์ภายใน lab
+### 💡 Key Technical Lessons / บทเรียนสำคัญ
+ 
+- Cisco IOS รุ่นเก่าต้องเปิด legacy SSH algorithms (`KexAlgorithms`, `HostKeyAlgorithms`, `PubkeyAcceptedKeyTypes`) ฝั่ง client ถึงจะ SSH เข้าได้
+- EVE-NG Community Edition ใช้ vIOS 15.9 ได้ดีกว่า Cat8000v (data plane ไม่ compatible)
+- ต้องระวัง VMware NAT/bridged mode MAC filtering เวลาเชื่อม lab ออกนอก
+- Netmiko `send_config_set()` เหมาะกับ push config, `send_command()` เหมาะกับการดึงข้อมูล
+### 📂 Project Structure / โครงสร้าง
+ 
+```
+Network-Automation/
+├── README.md
+├── netmiko/
+│   ├── lab1_single_device.py
+│   ├── lab2_multi_device.py
+│   ├── lab3_push_config.py
+│   └── lab4_backup_config.py
+├── ansible/
+│   ├── inventory.ini
+│   └── playbook.yml
+└── topology/
+    └── automation-lab.png
+```
+ 
+---
+ 
+# 4. Cloud Networking (AWS) / ระบบเครือข่ายบนคลาวด์
+ 
+> Building cloud network infrastructure on AWS — VPC, subnets, routing, security, and a live web server — applying traditional networking concepts to the cloud.
+>
+> สร้างโครงสร้างเครือข่ายบน AWS โดยนำความรู้ networking แบบดั้งเดิมมาประยุกต์บนคลาวด์
+ 
+### 🎯 Concept / แนวคิด
+ 
+จำลองการวางเครือข่ายองค์กรบนคลาวด์ — สร้าง VPC (เปรียบเหมือน LAN ของเราเองบน AWS), แบ่ง public/private subnet, วาง routing และ security ให้ EC2 instance รัน web server ออกเน็ตได้อย่างปลอดภัย
+ 
+### Architecture / สถาปัตยกรรม
+ 
+| Component | Configuration |
+|---|---|
+| **VPC** | MyFirstVPC — 10.0.0.0/16 |
+| **Subnets** | Public subnet + Private subnet |
+| **Internet Gateway** | เชื่อม public subnet ออกอินเทอร์เน็ต |
+| **Route Table** | route 0.0.0.0/0 → IGW สำหรับ public subnet |
+| **EC2** | t3.micro (Amazon Linux) รัน Nginx web server |
+| **Security Group** | เปิดเฉพาะ HTTP (80) + SSH (22) |
+ 
+### Networking Concept Mapping / เทียบกับ networking ดั้งเดิม
+ 
+| Traditional / แบบเดิม | AWS Equivalent |
+|---|---|
+| LAN / วงเครือข่าย | **VPC** |
+| Subnet | **Subnet** (public/private) |
+| Stateful firewall / ACL | **Security Group** (stateful) |
+| Stateless ACL | **NACL** (stateless) |
+| Router + default route | **Route Table + Internet Gateway** |
+ 
+### Skills Demonstrated / ทักษะที่แสดง
+ 
+- ออกแบบ VPC + subnet + routing บน AWS
+- ตั้งค่า Security Group (stateful) vs NACL (stateless)
+- Deploy EC2 + ติดตั้ง Nginx, ใช้ EC2 Instance Connect troubleshoot
+- เข้าใจ Stop vs Terminate, CapEx vs OpEx, IaaS/PaaS/SaaS
+### Next Steps / แผนต่อไป
+ 
+- NAT Gateway สำหรับให้ private subnet ออกเน็ต
+- VPC Peering เชื่อมหลาย VPC
+- Client VPN สำหรับ remote access
+- กำลังเตรียมสอบ **AWS Certified Cloud Practitioner / Solutions Architect Associate (SAA-C03)**
+### 💡 Key Technical Lessons / บทเรียนสำคัญ
+ 
+- Security Group เป็น **stateful** — อนุญาต inbound แล้ว return traffic ออกได้เลย ไม่ต้องเปิด outbound เพิ่ม
+- NACL เป็น **stateless** — ต้องเปิดทั้ง inbound และ outbound แยกกัน
+- EC2 ใน public subnet ต้องมี route ชี้ไป Internet Gateway ถึงจะออกเน็ตได้
+- Stop = หยุดชั่วคราว (เก็บ EBS, ไม่คิดเงิน compute) / Terminate = ลบถาวร
+### 📂 Project Structure / โครงสร้าง
+ 
+```
+Cloud-Networking-AWS/
+├── README.md
+├── docs/
+│   └── vpc-design.md
+└── screenshots/
+    ├── vpc-config.png
+    ├── security-group.png
+    └── nginx-running.png
+```
+ 
+---
 ---
 
 
 ## 👤 Author
 
-**Thanarak Kaewphaluek (Otto)** — Computer Engineering Student, Network Engineer track
+**Thanarak Kaewphaluek (Oat)** — Computer Engineering Student, Network Engineer track
 
 📧 thanarak.k66@rsu.ac.th &nbsp;|&nbsp; 🔗 [github.com/otto6147](https://github.com/otto6147)
