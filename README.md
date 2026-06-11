@@ -339,6 +339,6 @@ Cloud-Networking-AWS/
 
 ## 👤 Author
 
-**Thanarak Kaewphaluek (Oat)** — Computer Engineering Student, Network Engineer track
+**Thanarak Kaewpaluak (Oat)** — Computer Engineering Student, Network Engineer track
 
 📧 thanarak.k66@rsu.ac.th &nbsp;|&nbsp; 🔗 [github.com/otto6147](https://github.com/otto6147)
