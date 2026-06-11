@@ -213,8 +213,12 @@ TechStar/
 └── docs/
     └── design-document.md        # VLAN/subnet/ACL design rationale
 ```
+**Topologo diagram**
 
+
+<img width="3555" height="2512" alt="present" src="https://github.com/user-attachments/assets/9acc6839-4f59-48ad-9004-ad6fcf957fe0" />
 ---
+
 
 ## 👤 Author
 
